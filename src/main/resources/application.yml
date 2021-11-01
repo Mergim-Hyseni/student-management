@@ -1,0 +1,28 @@
+
+spring:
+  profiles:
+    active: default
+  main:
+    web-application-type: REACTIVE
+  data:
+    mongodb:
+      uri: mongodb://localhost:27017
+      database : student-management
+      auto-index-creation: on
+  jackson:
+    default-property-inclusion: non_null
+    serialization-inclusion: non_null
+  output:
+    ansi:
+      enabled: ALWAYS
+
+
+
+server:
+  shutdown: graceful
+  error :
+    include-message: always
+  port: 8080
+
+
+
