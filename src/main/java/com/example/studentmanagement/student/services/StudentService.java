@@ -86,11 +86,11 @@ public class StudentService {
     }
 
     public Mono<List<SubmitedCourse>> submitCourse(SubmitCourseDto submitCourseDto) {
-        return repository.checkIfStudentHasRegistredCourse(submitCourseDto.getIdStudent(),submitCourseDto.getIdCourse())
+        return repository.checkIfStudentHasRegistredCourse(submitCourseDto.getIdStudent(), submitCourseDto.getIdCourse())
                 .flatMap(hasRegistred -> hasRegistred ? deadlineService.checkIfDeadlineIsAvailable(submitCourseDto.getIdDeadline())
-                                                      : Mono.error(new BadRequestException("You must register course first")))
+                        : Mono.error(new BadRequestException("You must register course first")))
                 .flatMap(isDeadLineAvailable -> isDeadLineAvailable
-                        ? repository.submitCourse(submitCourseDto.getIdStudent(),submitCourseDto.convertDtoToEntity())
+                        ? repository.submitCourse(submitCourseDto.getIdStudent(), submitCourseDto.convertDtoToEntity())
                         : Mono.error(new BadRequestException("There are not available deadlines")))
                 .then(repository.getSubmittedCoursesByDeadline(submitCourseDto.getIdStudent(), submitCourseDto.getIdDeadline()));
     }
@@ -99,5 +99,25 @@ public class StudentService {
         return repository.getStudentEcts(studentId);
     }
 
-
+    public Flux<GetStudentDto> getStudentsByProgramIdEnrolledCourseId(String programId, String courseId) {
+        return repository.getStudentsByProgramIdEnrolledCourseId(programId, courseId);
     }
+
+    public Flux<GetStudentDto> getStudentsThatHasSubmittedCourseId(String deadlineId, String programId, String courseId) {
+        return repository.getStudentsThatHasSubmittedCourseId(deadlineId, programId, courseId);
+    }
+
+    public Flux<GetStudentDto> gradeTheStudent(String studentId, String programId, String courseId,
+                                               String deadlineId, int grade) {
+        return repository.gradeTheStudent(studentId, programId, courseId, deadlineId, grade);
+    }
+
+    public Flux<SubmittedCoursesResults> getSubmittedCoursesResults(String studentId, String programId, String deadlineId) {
+        return repository.getSubmittedCoursesResults(studentId, programId, deadlineId);
+    }
+
+    public Flux<SubmittedCoursesResults> refuseGrade(String programId, String studentId, String courseId, String deadlineId) {
+        return repository.refuseGrade(programId,studentId, courseId, deadlineId);
+    }
+
+}

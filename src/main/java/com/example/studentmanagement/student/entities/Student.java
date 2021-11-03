@@ -2,6 +2,7 @@ package com.example.studentmanagement.student.entities;
 
 import com.example.studentmanagement.Base.BaseEntity;
 import com.example.studentmanagement.student.dto.GetStudentDto;
+import com.example.studentmanagement.student.dto.StudentDto;
 import lombok.*;
 import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.index.IndexDirection;
@@ -32,7 +33,9 @@ public class Student extends BaseEntity {
     public static final String ECTS = "ects";
     public static final String SUBMITTED_COURSES_ECTS = "submittedCourses.idCourse.ects";
     public static final String SUBMITTED_COURSES_DEADLINE_ID = "submittedCourses." + SubmitedCourse.DEADLINE_ID ;
-
+    public static final String NAME = "name";
+    public static final String SURNAME = "surname";
+    public static final String EMAIL = "email";
 
     @Indexed(direction = IndexDirection.DESCENDING)
     private String programId;
@@ -58,18 +61,37 @@ public class Student extends BaseEntity {
     private Double average;
     private Integer ects;
 
-    public GetStudentDto convertStudentToGetStudentDto(){
-       GetStudentDto getStudentDto = new GetStudentDto();
-       getStudentDto.setId(id);
-       getStudentDto.setName(name);
-       getStudentDto.setPersonalNumber(personalNumber);
-       getStudentDto.setBirthdate(birthdate);
-       getStudentDto.setGender(gender);
-       getStudentDto.setTelNumber(telNumber);
-       getStudentDto.setAddress(address);
-       getStudentDto.setCreatedAt(createdAt);
+    public StudentDto convertStudentToStudentDto() {
+       StudentDto studentDto = new StudentDto();
+       studentDto.setId(id);
+       studentDto.setName(name);
+       studentDto.setPersonalNumber(personalNumber);
+       studentDto.setBirthdate(birthdate);
+       studentDto.setGender(gender);
+       studentDto.setTelNumber(telNumber);
+       studentDto.setAddress(address);
+       studentDto.setCreatedAt(createdAt);
 
-       return getStudentDto;
+       return studentDto;
+    }
+
+    public GetStudentDto convertStudentToGetStudentDto() {
+        GetStudentDto getStudentDto = new GetStudentDto();
+        getStudentDto.setId(id);
+        getStudentDto.setName(name);
+        getStudentDto.setSurname(surname);
+        getStudentDto.setEmail(email);
+
+        return getStudentDto;
+    }
+
+    public GetStudentDto convertStudentToGetStudentWithGradeDto() {
+        GetStudentDto getStudentDto = new GetStudentDto();
+        getStudentDto.setId(id);
+        getStudentDto.setName(name);
+        getStudentDto.setSurname(surname);
+        getStudentDto.setEmail(email);
+        return getStudentDto;
     }
 
 

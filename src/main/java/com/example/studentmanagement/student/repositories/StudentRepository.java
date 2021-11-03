@@ -8,12 +8,9 @@ import com.example.studentmanagement.student.entities.Student;
 import com.example.studentmanagement.student.entities.SubmitedCourse;
 import lombok.AllArgsConstructor;
 import lombok.val;
+import org.bson.types.ObjectId;
 import org.springframework.data.mongodb.core.ReactiveMongoTemplate;
-import org.springframework.data.mongodb.core.aggregation.ArithmeticOperators;
-import org.springframework.data.mongodb.core.aggregation.Fields;
-import org.springframework.data.mongodb.core.aggregation.GroupOperation;
 import org.springframework.data.mongodb.core.query.Criteria;
-import org.springframework.data.mongodb.core.query.Field;
 import org.springframework.data.mongodb.core.query.Query;
 import org.springframework.data.mongodb.core.query.Update;
 import org.springframework.stereotype.Repository;
@@ -21,7 +18,6 @@ import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
 import java.time.Instant;
-import java.util.ArrayList;
 import java.util.List;
 
 import static org.springframework.data.mongodb.core.aggregation.Aggregation.*;
@@ -40,26 +36,24 @@ public class StudentRepository {
                 .switchIfEmpty(Mono.error(new NotFoundException("Student not found")));
     }
 
-    public Mono<StudentEctsDto> getStudentEcts(String studentId){
+    public Mono<StudentEctsDto> getStudentEcts(String studentId) {
 
         val c1 = Criteria.where(Student.ID).is(studentId);
         val c2 = Criteria.where(Student.SUBMITTED_COURSES_GRADE_PLACED_DATE).lt(Instant.now().minusSeconds(2 * 60));
 
         val groupOperation = group(Student.ID)
                 .sum("course.ects").as("ects")
-                .first(Student.PROGRAM_ID).as("programId")
-
-                ;
+                .first(Student.PROGRAM_ID).as("programId");
 
         val aggregation = newAggregation(
                 match(c1),
                 unwind(Student.SUBMITTED_COURSES),
                 match(c2),
-                lookup(Course.COLLECTION,Student.SUBMITTED_COURSES_IDCOURSE, Course.ID, "course"),
+                lookup(Course.COLLECTION, Student.SUBMITTED_COURSES_IDCOURSE, Course.ID, "course"),
                 unwind("course")
-                ,groupOperation
+                , groupOperation
         );
-        return reactiveMongoTemplate.aggregate(aggregation,Student.class,StudentEctsDto.class)
+        return reactiveMongoTemplate.aggregate(aggregation, Student.class, StudentEctsDto.class)
                 .reduce((studentEctsDto, studentEctsDto2) -> studentEctsDto);
     }
 
@@ -146,9 +140,9 @@ public class StudentRepository {
                 project(Student.SUBMITTED_COURSES)
         );
 
-        return reactiveMongoTemplate.aggregate(aggregation,Student.class, GetSubmittedCoursesDto.class)
+        return reactiveMongoTemplate.aggregate(aggregation, Student.class, GetSubmittedCoursesDto.class)
                 .reduce((getSubmittedCoursesDto, getSubmittedCoursesDto2) -> getSubmittedCoursesDto)
-                  .map(getSubmittedCoursesDto -> getSubmittedCoursesDto.getSubmittedCourses())
+                .map(getSubmittedCoursesDto -> getSubmittedCoursesDto.getSubmittedCourses())
                 ;
     }
 
@@ -169,6 +163,104 @@ public class StudentRepository {
         return reactiveMongoTemplate.exists(query, Student.class);
     }
 
+    public Flux<GetStudentDto> getStudentsByProgramIdEnrolledCourseId(String programId, String courseId) {
+        val c1 = Criteria.where(Student.PROGRAM_ID).is(programId);
+        val c2 = Criteria.where(Student.COURSES).in(courseId);
+        val c3 = Criteria.where(SubmitedCourse.COURSE_ID).is(courseId);
+        val c4 = Criteria.where(SubmitedCourse.GRADE).gte(6).lte(10);
+        val c5 = Criteria.where(SubmitedCourse.STATUS).is(SubmitedCourse.ACCEPTED_STATUS);
+        val c6 = Criteria.where(SubmitedCourse.GRADE_PLACED_DATE).lt(Instant.now().minusSeconds(2 * 60));
+        val c7 = new Criteria().andOperator(c3, c4, c5, c6);
+        val c8 = Criteria.where(Student.SUBMITTED_COURSES).not().elemMatch(c7);
+        val c = new Criteria().andOperator(c1, c2, c8);
+        val query = Query.query(c);
+
+        return reactiveMongoTemplate.find(query, Student.class)
+                .map(student -> student.convertStudentToGetStudentDto());
+    }
+
+    public Flux<GetStudentDto> getStudentsThatHasSubmittedCourseId(String deadlineId, String programId, String courseId) {
+        val c1 = Criteria.where(Student.PROGRAM_ID).is(programId);
+        val c2 = Criteria.where(SubmitedCourse.COURSE_ID).is(courseId);
+        val c3 = Criteria.where(SubmitedCourse.DEADLINE_ID).is(deadlineId);
+        val c4 = new Criteria().andOperator(c2, c3);
+        val c5 = Criteria.where(Student.SUBMITTED_COURSES).elemMatch(c4);
+        val c = new Criteria().andOperator(c1, c5);
+
+        val c6 = Criteria.where(Student.SUBMITTED_COURSES + "." + SubmitedCourse.COURSE_ID).is(new ObjectId(courseId));
+        val c7 = Criteria.where(Student.SUBMITTED_COURSES + "." + SubmitedCourse.DEADLINE_ID).is(new ObjectId(deadlineId));
+        val c8 = new Criteria().andOperator(c6, c7);
+
+        val aggregation = newAggregation(
+                match(c),
+                project(Student.ID, Student.NAME, Student.SURNAME, Student.EMAIL, Student.SUBMITTED_COURSES),
+                unwind(Student.SUBMITTED_COURSES),
+                match(c8),
+                project(Student.ID, Student.NAME, Student.SURNAME, Student.EMAIL)
+                        .and(Student.SUBMITTED_COURSES + "." + SubmitedCourse.GRADE).as(SubmitedCourse.GRADE)
+        );
+
+        return reactiveMongoTemplate.aggregate(aggregation, Student.class, GetStudentDto.class);
+    }
+
+
+    public Flux<GetStudentDto> gradeTheStudent(String studentId, String programId, String courseId,
+                                               String deadlineId, int grade) {
+        val c1 = Criteria.where(Student.PROGRAM_ID).is(programId);
+        val c2 = Criteria.where(Student.ID).is(studentId);
+        val c3 = Criteria.where(Student.SUBMITTED_COURSES_IDCOURSE).is(courseId);
+        val c4 = Criteria.where(Student.SUBMITTED_COURSES_DEADLINE_ID).is(deadlineId);
+        val c = new Criteria().andOperator(c1,c2,c3,c4);
+        val query = Query.query(c);
+
+        val update = new Update().set(Student.SUBMITTED_COURSES + ".$." + SubmitedCourse.GRADE, grade)
+                .currentDate(Student.SUBMITTED_COURSES + ".$." + SubmitedCourse.GRADE_PLACED_DATE)
+                .set(Student.SUBMITTED_COURSES + ".$." + SubmitedCourse.STATUS, SubmitedCourse.ACCEPTED_STATUS);
+
+        return reactiveMongoTemplate.updateFirst(query, update, Student.class)
+                .thenMany(getStudentsThatHasSubmittedCourseId(deadlineId, programId, courseId));
+    }
+
+    public Flux<SubmittedCoursesResults> getSubmittedCoursesResults(String studentId, String programId, String deadlineId) {
+        val c1 = Criteria.where(Student.PROGRAM_ID).is(programId);
+        val c2 = Criteria.where(Student.ID).is(studentId);
+        val c3 = new Criteria().andOperator(c1,c2);
+
+        val c4 = Criteria.where(Student.SUBMITTED_COURSES_DEADLINE_ID).is(new ObjectId(deadlineId));
+
+        val aggregate = newAggregation(
+                match(c3),
+                project(Student.SUBMITTED_COURSES),
+                unwind(Student.SUBMITTED_COURSES),
+                match(c4),
+                lookup(Course.COLLECTION, Student.SUBMITTED_COURSES_IDCOURSE, Course.ID, "course"),
+                unwind("course"),
+                project()
+                .and("course." + Course.NAME).as(SubmittedCoursesResults.COURSE_NAME)
+                .and(Student.SUBMITTED_COURSES + "." + SubmitedCourse.GRADE).as(SubmittedCoursesResults.GRADE)
+                .and(Student.SUBMITTED_COURSES + "." + SubmitedCourse.STATUS).as(SubmittedCoursesResults.STATUS)
+                .and(Student.SUBMITTED_COURSES + "." + SubmitedCourse.GRADE_PLACED_DATE).as(SubmittedCoursesResults.GRADEPLACEDDATE)
+
+        );
+
+        return reactiveMongoTemplate.aggregate(aggregate, Student.class, SubmittedCoursesResults.class);
+    }
+
+    public Flux<SubmittedCoursesResults> refuseGrade(String programId, String studentId, String courseId, String deadlineId) {
+        val c1 = Criteria.where(Student.PROGRAM_ID).is(programId);
+        val c2 = Criteria.where(Student.ID).is(studentId);
+        val c3 = Criteria.where(Student.SUBMITTED_COURSES_IDCOURSE).is(courseId);
+        val c4 = Criteria.where(Student.SUBMITTED_COURSES_DEADLINE_ID).is(deadlineId);
+        val c5 = Criteria.where(Student.SUBMITTED_COURSES_GRADE_PLACED_DATE).gt(Instant.now().minusSeconds(2*60));
+
+        val c6 = new Criteria().andOperator(c1, c2, c3, c4, c5);
+        val query = Query.query(c6);
+
+        val update = new Update().set(Student.SUBMITTED_COURSES + ".$." + SubmitedCourse.STATUS, SubmitedCourse.REFUSED_STATUS);
+
+        return reactiveMongoTemplate.updateFirst(query, update, Student.class)
+                .thenMany(getSubmittedCoursesResults(studentId,programId,deadlineId));
+    }
 
 
 

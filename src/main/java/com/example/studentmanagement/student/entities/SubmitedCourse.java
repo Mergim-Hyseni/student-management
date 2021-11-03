@@ -17,11 +17,11 @@ import java.time.Instant;
 public class SubmitedCourse extends BaseEntity {
     public static final String DEADLINE_ID = "idDeadline";
     public static final String COURSE_ID = "idCourse";
+    public static final String GRADE = "grade";
+    public static final String STATUS = "status";
     public static final String GRADE_PLACED_DATE = "gradePlacedDate";
     public static final String ACCEPTED_STATUS = "ACCEPTED";
     public static final String REFUSED_STATUS = "REFUSED";
-
-
 
     @Field(targetType = FieldType.OBJECT_ID)
     private String idCourse;

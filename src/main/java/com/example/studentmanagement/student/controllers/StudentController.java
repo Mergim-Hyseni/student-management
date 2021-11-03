@@ -76,5 +76,16 @@ public class StudentController {
         return service.getStudentEcts(studentId);
     }
 
+    @GetMapping("/results")
+    public Flux<SubmittedCoursesResults> getSubmittedCoursesResults(@RequestParam String studentId,
+                                                                    @RequestParam String programId,
+                                                                    @RequestParam String deadlineId) {
+        return service.getSubmittedCoursesResults(studentId, programId, deadlineId);
+    }
 
+    @PutMapping("/refuseGrade")
+    public Flux<SubmittedCoursesResults> refuseGrade(@RequestParam String programId, @RequestParam String studentId,
+                                                     @RequestParam String courseId, @RequestParam String deadlineId) {
+        return service.refuseGrade(programId, studentId, courseId, deadlineId);
+    }
 }

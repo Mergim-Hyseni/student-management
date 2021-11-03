@@ -26,6 +26,7 @@ public class Course extends BaseEntity {
     public static final String COLLECTION = "Course";
     public static final String PROGRAM_ID = "programId";
     public static final String SEMESTER = "semester";
+    public static final String NAME = "name";
 
     @NotBlank
     private String name;
