@@ -1,6 +1,6 @@
 package com.example.studentmanagement.semester.entities;
 
-import com.example.studentmanagement.Base.BaseEntity;
+import com.example.studentmanagement.base.BaseEntity;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;
@@ -10,7 +10,6 @@ import javax.validation.constraints.NotBlank;
 import javax.validation.constraints.NotNull;
 import javax.validation.constraints.Pattern;
 import javax.validation.constraints.Positive;
-import java.time.Instant;
 
 @Data
 @EqualsAndHashCode(callSuper = true)

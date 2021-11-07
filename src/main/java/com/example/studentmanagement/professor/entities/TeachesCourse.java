@@ -1,8 +1,6 @@
 package com.example.studentmanagement.professor.entities;
 
-import com.example.studentmanagement.Base.BaseEntity;
 import lombok.Data;
-import lombok.EqualsAndHashCode;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 

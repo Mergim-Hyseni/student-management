@@ -1,7 +1,6 @@
 package com.example.studentmanagement.program.entities;
 
-import com.example.studentmanagement.Base.BaseEntity;
-import com.example.studentmanagement.course.entities.Course;
+import com.example.studentmanagement.base.BaseEntity;
 import lombok.Builder;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

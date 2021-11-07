@@ -13,6 +13,7 @@ import com.example.studentmanagement.student.entities.SubmitedCourse;
 import com.example.studentmanagement.student.repositories.StudentRepository;
 import lombok.AllArgsConstructor;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import lombok.val;
 import org.springframework.stereotype.Service;
 import org.springframework.web.bind.annotation.RequestParam;
@@ -21,6 +22,7 @@ import reactor.core.publisher.Mono;
 
 import java.util.List;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class StudentService {
@@ -48,6 +50,8 @@ public class StudentService {
                 .flatMap(objects -> {
                     val student = objects.getT1();
                     val semester = objects.getT2();
+                    log.info("student {}", student);
+                    log.info("semester {}", semester);
                     if (semester.getNumber() % 2 == 0 || semester.getNumber() == 1) {
                         return Mono.just(true);
                     } else

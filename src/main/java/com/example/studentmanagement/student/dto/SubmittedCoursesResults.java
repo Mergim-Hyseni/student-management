@@ -18,8 +18,4 @@ public class SubmittedCoursesResults {
     private String status;
     private Instant gradePlacedDate;
 
-    @Data
-    static class CourseName {
-        private String name;
-    }
 }

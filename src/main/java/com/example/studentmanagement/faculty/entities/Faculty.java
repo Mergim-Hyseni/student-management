@@ -1,6 +1,6 @@
 package com.example.studentmanagement.faculty.entities;
 
-import com.example.studentmanagement.Base.BaseEntity;
+import com.example.studentmanagement.base.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.EqualsAndHashCode;

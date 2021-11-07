@@ -1,12 +1,10 @@
 package com.example.studentmanagement.student.entities;
 
-import com.example.studentmanagement.Base.BaseEntity;
+import com.example.studentmanagement.base.BaseEntity;
 import lombok.*;
-import org.springframework.data.mongodb.core.index.CompoundIndex;
 import org.springframework.data.mongodb.core.mapping.Field;
 import org.springframework.data.mongodb.core.mapping.FieldType;
 
-import java.security.PublicKey;
 import java.time.Instant;
 
 @Data

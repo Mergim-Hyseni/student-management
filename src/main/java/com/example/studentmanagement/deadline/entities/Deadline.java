@@ -1,7 +1,7 @@
 package com.example.studentmanagement.deadline.entities;
 
 
-import com.example.studentmanagement.Base.BaseEntity;
+import com.example.studentmanagement.base.BaseEntity;
 import lombok.AllArgsConstructor;
 import lombok.Builder;
 import lombok.Data;

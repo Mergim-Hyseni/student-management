@@ -1,6 +1,6 @@
 package com.example.studentmanagement.student.entities;
 
-import com.example.studentmanagement.Base.BaseEntity;
+import com.example.studentmanagement.base.BaseEntity;
 import com.example.studentmanagement.student.dto.GetStudentDto;
 import com.example.studentmanagement.student.dto.StudentDto;
 import lombok.*;

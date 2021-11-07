@@ -1,6 +1,6 @@
 package com.example.studentmanagement.student.dto;
 
-import com.example.studentmanagement.Base.BaseEntity;
+import com.example.studentmanagement.base.BaseEntity;
 import com.example.studentmanagement.course.entities.Course;
 import com.example.studentmanagement.deadline.entities.Deadline;
 import com.example.studentmanagement.program.entities.Program;

@@ -1,10 +1,9 @@
-package com.example.studentmanagement.Base;
+package com.example.studentmanagement.base;
 
 import lombok.*;
 import org.springframework.data.annotation.CreatedDate;
 import org.springframework.data.annotation.Id;
 import org.springframework.data.annotation.LastModifiedDate;
-import org.springframework.web.bind.annotation.GetMapping;
 
 import java.time.Instant;
 
