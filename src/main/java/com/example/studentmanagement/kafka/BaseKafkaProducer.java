@@ -47,6 +47,7 @@ public class BaseKafkaProducer <T> {
     }
 
     public void sendMessages(T message) {
+        System.out.println("Sending to kafka " + message);
         Mono<SenderRecord<String, T, Object>> senderRecords = Mono.just(message)
                 .map(s -> SenderRecord.create(new ProducerRecord<>(topic, s), null));
         sender.send(senderRecords)

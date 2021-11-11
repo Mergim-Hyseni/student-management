@@ -10,7 +10,7 @@ public class TestKafka {
     private final BaseKafkaProducer kafkaStringProducer = new BaseKafkaProducer(String.class, "message");
     private final BaseKafkaProducer kafkaObjectProducer = new BaseKafkaProducer(User.class, "users");
 
-    @GetMapping("/{message}")
+    @PostMapping("/{message}")
     public void publishMessageToKafka(@PathVariable String message) {
         kafkaStringProducer.sendMessages(message);
     }
